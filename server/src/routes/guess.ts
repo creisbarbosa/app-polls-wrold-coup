@@ -4,11 +4,11 @@ import { prisma } from "../lib/prisma"
 import { authenticate } from "../plugins/authenticate"
 
 export async function guessRoutes(fastify: FastifyInstance) {
-  fastify.get('/guesses/count', async () => {
-    const count = await prisma.guess.count()
 
-    return { count }
-  })
+  fastify.get('/guesses/count', async () => {
+    const count = await prisma.guess.count();
+    return { count: count}
+  });
 
   fastify.post('/pools/:poolId/games/:gameId/guesses', {
     onRequest: [authenticate]
@@ -24,16 +24,16 @@ export async function guessRoutes(fastify: FastifyInstance) {
     })
 
     const { poolId, gameId } = createGuessParams.parse(request.params)
-    const { firstTeamPoints, secondTeamPoints } = createGuessBody.parse(request.body)
+    const { firstTeamPoints, secondTeamPoints } = createGuessBody.parse(request.body);
 
     const participant = await prisma.participant.findUnique({
       where: {
         userId_poolId: {
           poolId,
-          userId: request.user.sub,
+          userId: request.user.sub
         }
       }
-    })
+  })
 
     if (!participant) {
       return reply.status(404).send({
@@ -47,7 +47,7 @@ export async function guessRoutes(fastify: FastifyInstance) {
           participantId: participant.id,
           gameId
         }
-      },
+      }
     })
 
     if (!guess) {
@@ -86,5 +86,5 @@ export async function guessRoutes(fastify: FastifyInstance) {
     return reply.status(201).send({
       message: "Guess created successfully."
     })
-  })
+  });
 }
